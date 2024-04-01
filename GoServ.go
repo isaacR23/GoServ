@@ -17,10 +17,20 @@ func main() {
 		Addr:    ":" + port,
 		Handler: corsMux,
 	}
-
-	// handler := http.FileServer(http.Dir("."))
+	// Serve the assets directory under the path /app/assets/
 	logoDir := http.FileServer(http.Dir("./assets/"))
-	mux.Handle("/assets/", http.StripPrefix("/assets/", logoDir))
+	mux.Handle("/app/assets/", http.StripPrefix("/app/assets/", logoDir))
+	// Serve index.html at the path /app
+	mux.HandleFunc("/app", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./index.html")
+	})
+
+	mux.HandleFunc("/healthz",func(curl http.ResponseWriter, req *http.Request){
+
+		curl.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		curl.WriteHeader(http.StatusOK)
+		curl.Write([]byte("OK"))
+	})
 
 	log.Printf("Serving on port: http://localhost:%s\n", port)
 	log.Fatal(srv.ListenAndServe())
